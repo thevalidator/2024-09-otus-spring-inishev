@@ -1,10 +1,17 @@
 package ru.otus.hw.dao;
 
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import lombok.RequiredArgsConstructor;
 import ru.otus.hw.config.TestFileNameProvider;
+import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
+import ru.otus.hw.exceptions.QuestionReadException;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -13,11 +20,28 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        // Использовать CsvToBean
-        // https://opencsv.sourceforge.net/#collection_based_bean_fields_one_to_many_mappings
-        // Использовать QuestionReadException
-        // Про ресурсы: https://mkyong.com/java/java-read-a-file-from-resources-folder/
+        try (InputStream is = getFileFromResourceAsStream(fileNameProvider.getTestFileName());
+             InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            List<QuestionDto> questions = new CsvToBeanBuilder<QuestionDto>(isr)
+                    .withSkipLines(1)
+                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS)
+                    .withType(QuestionDto.class)
+                    .withSeparator(';')
+                    .build()
+                    .parse();
+            return questions.stream().map(QuestionDto::toDomainObject).toList();
+        } catch (IOException e) {
+            throw new QuestionReadException(e.getMessage(), e);
+        }
+    }
 
-        return new ArrayList<>();
+    private InputStream getFileFromResourceAsStream(String fileName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(fileName);
+        if (inputStream == null) {
+            throw new QuestionReadException("file not found: " + fileName);
+        } else {
+            return inputStream;
+        }
     }
 }
