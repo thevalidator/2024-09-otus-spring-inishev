@@ -3,11 +3,13 @@ package ru.otus.hw.dao.dto;
 import com.opencsv.bean.AbstractCsvConverter;
 import ru.otus.hw.domain.Answer;
 
+import static java.util.Objects.isNull;
+
 public class AnswerCsvConverter extends AbstractCsvConverter {
 
     @Override
     public Object convertToRead(String value) {
-        if (value == null || value.trim().isEmpty()) {
+        if (isNull(value) || value.trim().isEmpty()) {
             return null;
         }
         var valueArr = value.split("%");

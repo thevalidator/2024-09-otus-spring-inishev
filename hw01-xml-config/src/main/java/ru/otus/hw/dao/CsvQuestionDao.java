@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 @RequiredArgsConstructor
 public class CsvQuestionDao implements QuestionDao {
     private final TestFileNameProvider fileNameProvider;
@@ -38,7 +40,7 @@ public class CsvQuestionDao implements QuestionDao {
     private InputStream getFileFromResourceAsStream(String fileName) {
         ClassLoader classLoader = getClass().getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream(fileName);
-        if (inputStream == null) {
+        if (isNull(inputStream)) {
             throw new QuestionReadException("file not found: " + fileName);
         } else {
             return inputStream;
