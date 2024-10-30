@@ -7,8 +7,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+import static java.util.Objects.nonNull;
+
 @Service
 public class StreamsIOService implements IOService {
+
     private static final int MAX_ATTEMPTS = 10;
 
     private final PrintStream printStream;
@@ -39,8 +42,20 @@ public class StreamsIOService implements IOService {
 
     @Override
     public String readStringWithPrompt(String prompt) {
+        String input;
         printLine(prompt);
-        return scanner.nextLine();
+        int attempts = MAX_ATTEMPTS;
+        while ((input = scanner.nextLine()).isEmpty() && attempts-- > 0) {
+            printLine("The input can't be empty, please try again");
+        }
+        if (inputIsNotBlank(input)) {
+            return input;
+        }
+        throw new IllegalArgumentException("Error during reading input text");
+    }
+
+    private boolean inputIsNotBlank(String text) {
+        return nonNull(text) && !text.isBlank();
     }
 
     @Override
@@ -65,4 +80,5 @@ public class StreamsIOService implements IOService {
         printLine(prompt);
         return readIntForRange(min, max, errorMessage);
     }
+
 }

@@ -1,12 +1,9 @@
 package ru.otus.hw.dao;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.otus.hw.Application;
@@ -15,7 +12,9 @@ import ru.otus.hw.domain.Question;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = Application.class)
@@ -26,14 +25,6 @@ class CsvQuestionDaoTest {
     @Autowired
     CsvQuestionDaoTest(CsvQuestionDao dao) {
         this.dao = dao;
-    }
-
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @Test

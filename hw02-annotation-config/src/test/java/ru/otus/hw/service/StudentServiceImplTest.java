@@ -17,13 +17,9 @@ import static ru.otus.hw.TestConfiguration.STUDENT_NAME;
 @ContextConfiguration(classes = {Application.class, TestConfiguration.class})
 class StudentServiceImplTest {
 
+    @Autowired
     @InjectMocks
     private StudentService studentService;
-
-    @Autowired
-    public StudentServiceImplTest(StudentService studentService) {
-        this.studentService = studentService;
-    }
 
     @Test
     void determineCurrentStudent() {
