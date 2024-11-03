@@ -4,25 +4,27 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.otus.hw.Application;
-import ru.otus.hw.TestConfiguration;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static ru.otus.hw.TestConfiguration.STUDENT_LASTNAME;
-import static ru.otus.hw.TestConfiguration.STUDENT_NAME;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {Application.class, TestConfiguration.class})
+@ExtendWith(MockitoExtension.class)
 class StudentServiceImplTest {
 
-    @Autowired
+    public static final String STUDENT_NAME = "Leo";
+    public static final String STUDENT_LASTNAME = "Gilbert";
+
+    @Mock
+    public IOService ioServiceMock;
+
     @InjectMocks
-    private StudentService studentService;
+    private StudentServiceImpl studentService;
 
     @Test
     void determineCurrentStudent() {
+        when(ioServiceMock.readStringWithPrompt("Please input your first name")).thenReturn(STUDENT_NAME);
+        when(ioServiceMock.readStringWithPrompt("Please input your last name")).thenReturn(STUDENT_LASTNAME);
         var student = studentService.determineCurrentStudent();
         Assertions.assertEquals(STUDENT_NAME, student.firstName());
         Assertions.assertEquals(STUDENT_LASTNAME, student.lastName());
