@@ -1,0 +1,5 @@
+test:
+  rightAnswersCountToPass: 2
+  fileNameByLocaleTag:
+    en-US: questions-test.csv
+    ru-RU: questions_ru-test.csv
