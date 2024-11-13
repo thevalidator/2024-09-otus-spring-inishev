@@ -23,8 +23,10 @@ class StudentServiceImplTest {
 
     @Test
     void determineCurrentStudent() {
-        when(ioServiceMock.readStringWithPromptLocalized("StudentService.input.first.name")).thenReturn(STUDENT_NAME);
-        when(ioServiceMock.readStringWithPromptLocalized("StudentService.input.last.name")).thenReturn(STUDENT_LASTNAME);
+        when(ioServiceMock.readStringWithPromptLocalized("StudentService.input.first.name"))
+                .thenReturn(STUDENT_NAME);
+        when(ioServiceMock.readStringWithPromptLocalized("StudentService.input.last.name"))
+                .thenReturn(STUDENT_LASTNAME);
         var student = studentService.determineCurrentStudent();
         Assertions.assertEquals(STUDENT_NAME, student.firstName());
         Assertions.assertEquals(STUDENT_LASTNAME, student.lastName());

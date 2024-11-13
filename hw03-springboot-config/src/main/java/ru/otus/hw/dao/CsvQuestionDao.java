@@ -8,6 +8,7 @@ import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
+import ru.otus.hw.service.QuestionDtoVerifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,8 @@ public class CsvQuestionDao implements QuestionDao {
 
     private final TestFileNameProvider fileNameProvider;
 
+    private final QuestionDtoVerifier questionDtoVerifier;
+
     @Override
     public List<Question> findAll() {
         try (InputStream is = getFileFromResourceAsStream(fileNameProvider.getTestFileName());
@@ -32,9 +35,14 @@ public class CsvQuestionDao implements QuestionDao {
                     .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS)
                     .withType(QuestionDto.class)
                     .withSeparator(';')
+                    .withVerifier(questionDtoVerifier)
                     .build()
                     .parse();
-            return questions.stream().map(QuestionDto::toDomainObject).toList();
+            List<Question> questionDtoList = questions.stream().map(QuestionDto::toDomainObject).toList();
+            if (questionDtoList.isEmpty()) {
+                throw new QuestionReadException("no questions found");
+            }
+            return questionDtoList;
         } catch (IOException e) {
             throw new QuestionReadException(e.getMessage(), e);
         }
