@@ -1,0 +1,8 @@
+${AnsiColor.MAGENTA} ██████╗ ${AnsiColor.CYAN}██╗   ██╗${AnsiColor.YELLOW}██╗${AnsiColor.GREEN}███████╗
+${AnsiColor.MAGENTA}██╔═══██╗${AnsiColor.CYAN}██║   ██║${AnsiColor.YELLOW}██║${AnsiColor.GREEN}╚══███╔╝
+${AnsiColor.MAGENTA}██║   ██║${AnsiColor.CYAN}██║   ██║${AnsiColor.YELLOW}██║${AnsiColor.GREEN}  ███╔╝
+${AnsiColor.MAGENTA}██║▄▄ ██║${AnsiColor.CYAN}██║   ██║${AnsiColor.YELLOW}██║${AnsiColor.GREEN} ███╔╝
+${AnsiColor.MAGENTA}╚██████╔╝${AnsiColor.CYAN}╚██████╔╝${AnsiColor.YELLOW}██║${AnsiColor.GREEN}███████╗
+${AnsiColor.MAGENTA} ╚══▀▀═╝ ${AnsiColor.CYAN} ╚═════╝ ${AnsiColor.YELLOW}╚═╝${AnsiColor.GREEN}╚══════╝
+${AnsiColor.DEFAULT}${app.name} (v${app.version})
+Powered by Spring Boot${spring-boot.formatted-version}
