@@ -55,12 +55,9 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public void deleteById(long id) {
-        findById(id).ifPresentOrElse(book -> {
-            removeGenresRelationsFor(book);
-            jdbc.update("delete from books where id = :id", Map.of("id", id));
-        }, () -> {
-            throw new EntityNotFoundException("Book with id=" + id + " not found");
-        });
+        removeGenresRelationsByBookId(id);
+        int rowsDeleted = jdbc.update("delete from books where id = :id", Map.of("id", id));
+        checkExecutionResult(rowsDeleted, id);
     }
 
     private List<Book> getAllBooksWithoutGenres() {
@@ -128,14 +125,18 @@ public class JdbcBookRepository implements BookRepository {
                 .addValue("title", book.getTitle())
                 .addValue("author_id", book.getAuthor().getId());
         int rowsUpdated = jdbc.update("update books set title = :title, author_id = :author_id where id = :id", params);
-        if (rowsUpdated < 1) {
-            throw new EntityNotFoundException("Book with id=" + book.getId() + " not found");
-        }
-        removeGenresRelationsFor(book);
+        checkExecutionResult(rowsUpdated, book.getId());
+        removeGenresRelationsByBookId(book.getId());
         batchInsertGenresRelationsFor(book);
 
         book = getBookById(book.getId());
         return book;
+    }
+
+    private void checkExecutionResult(int rowsUpdated, long bookId) {
+        if (rowsUpdated < 1) {
+            throw new EntityNotFoundException("Book with id=" + bookId + " not found");
+        }
     }
 
     private void batchInsertGenresRelationsFor(Book book) {
@@ -150,9 +151,9 @@ public class JdbcBookRepository implements BookRepository {
                 params.toArray(new MapSqlParameterSource[0]));
     }
 
-    private void removeGenresRelationsFor(Book book) {
+    private void removeGenresRelationsByBookId(long bookId) {
         var params = new MapSqlParameterSource();
-        params.addValue("book_id", book.getId());
+        params.addValue("book_id", bookId);
         jdbc.update("delete from books_genres where book_id = :book_id", params);
     }
 
@@ -176,13 +177,7 @@ public class JdbcBookRepository implements BookRepository {
             long authorId = rs.getLong("author_id");
             String authorFullName = rs.getString("author_full_name");
 
-            Book book = new Book();
-            book.setId(id);
-            book.setTitle(title);
-            book.setAuthor(new Author(authorId, authorFullName));
-            book.setGenres(new ArrayList<>());
-
-            return book;
+            return new Book(id,title, new Author(authorId,authorFullName), new ArrayList<>());
         }
 
     }
