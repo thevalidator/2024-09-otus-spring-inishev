@@ -15,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JpaBookRepository implements BookRepository {
 
-    private static final String FETCH_GRAPH_PROP = "javax.persistence.fetchgraph";
+    private static final String FETCH_GRAPH_PROP = "jakarta.persistence.fetchgraph";
 
     @PersistenceContext
     private final EntityManager em;
