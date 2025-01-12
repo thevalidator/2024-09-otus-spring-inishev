@@ -7,8 +7,10 @@ import ru.otus.hw.models.Comment;
 public class CommentConverter {
 
     public String commentToString(Comment comment) {
-        return "Book author: %s, Id: %d, Message: %s".formatted(comment.getBook().getAuthor(), comment.getId(), comment.getMessage());
-//        return "Id: %d, Message: %s".formatted(comment.getId(), comment.getMessage());
+        return "Id: %d, message: %s, book id: %d".formatted(
+                comment.getId(),
+                comment.getMessage(),
+                comment.getBook().getId());
     }
 
 }
