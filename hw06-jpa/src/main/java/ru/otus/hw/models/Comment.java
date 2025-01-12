@@ -10,6 +10,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,11 +21,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "comments")
-/*@NamedEntityGraph(
+@NamedEntityGraph(
         name = "comment-book",
         attributeNodes = {
-                @NamedAttributeNode("book")
-        })*/
+                @NamedAttributeNode(value = "book", subgraph = "subgraph.book")
+        },
+        subgraphs = {
+                @NamedSubgraph(name = "subgraph.book", attributeNodes = {@NamedAttributeNode(value = "author")})
+        })
 public class Comment {
 
     @Id
