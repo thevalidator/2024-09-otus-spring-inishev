@@ -3,7 +3,7 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
@@ -12,13 +12,19 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-@RequiredArgsConstructor
 public class JpaBookRepository implements BookRepository {
 
     private static final String FETCH_GRAPH_PROP = "jakarta.persistence.fetchgraph";
 
     @PersistenceContext
     private final EntityManager em;
+    private final EntityGraph<?> bookGraph;
+
+    @Autowired
+    public JpaBookRepository(EntityManager em) {
+        this.em = em;
+        this.bookGraph = em.getEntityGraph("book-author-genres");;
+    }
 
     @Override
     public Optional<Book> findById(long id) {
@@ -50,7 +56,7 @@ public class JpaBookRepository implements BookRepository {
     }
 
     private EntityGraph<?> getBookEntityGraph() {
-        return em.getEntityGraph("book-author-genres");
+        return bookGraph;
     }
 
 }
