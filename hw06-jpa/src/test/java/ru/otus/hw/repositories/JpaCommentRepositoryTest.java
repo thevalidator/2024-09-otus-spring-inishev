@@ -47,10 +47,10 @@ class JpaCommentRepositoryTest {
         var foundComment = jpaCommentRepository.findById(expectedComment.getId()).orElse(null);
 
         assertThat(foundComment).isNotNull()
-                .hasFieldOrPropertyWithValue("id", expectedComment.getId())
-                .hasFieldOrPropertyWithValue("message", expectedComment.getMessage())
-                .hasFieldOrPropertyWithValue("book.id", expectedComment.getBook().getId())
-        ;
+                .matches(c -> c.getId() == expectedComment.getId())
+                .matches(c -> c.getId() == commentId)
+                .matches(c -> c.getMessage().equals(expectedComment.getMessage()))
+                .matches(c -> c.getBook().getId() == expectedComment.getBook().getId());
         System.out.println(foundComment);
     }
 
