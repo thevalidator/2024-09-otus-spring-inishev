@@ -19,6 +19,7 @@ public class JpaBookRepository implements BookRepository {
 
     @PersistenceContext
     private final EntityManager em;
+
     private final EntityGraph<?> bookGraph;
 
     @Autowired

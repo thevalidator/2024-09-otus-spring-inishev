@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.converters.AuthorConverter;
@@ -29,6 +30,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("Сервис для работы с книгами")
 @DataJpaTest
 @Import({
         BookServiceImpl.class,
@@ -63,7 +65,7 @@ class BookServiceImplTest {
     @DisplayName("должен находить книгу по ее id")
     @ParameterizedTest
     @MethodSource("getDbBooks")
-    void findById(Book book) {
+    void shouldFindById(Book book) {
         var expectedBook = dbBooks.get(dbBooks.indexOf(book));
         var foundBook = bookService.findById(book.getId());
         assertThat(foundBook).isPresent();
@@ -73,7 +75,7 @@ class BookServiceImplTest {
 
     @DisplayName("должен загружать список всех книг")
     @Test
-    void findAll() {
+    void shouldFindAll() {
         var expectedBooks = dbBooks;
         var foundBooks = bookService.findAll();
         assertThat(foundBooks).hasSameElementsAs(expectedBooks);
@@ -82,7 +84,8 @@ class BookServiceImplTest {
 
     @DisplayName("должен сохранять новую книгу")
     @Test
-    void insert() {
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void shouldInsert() {
         String title = "test title";
         var author = dbAuthors.get(2);
         var genres = dbGenres.stream().map(Genre::getId).collect(Collectors.toSet());
@@ -97,7 +100,8 @@ class BookServiceImplTest {
 
     @DisplayName("должен обновить существующую книгу")
     @Test
-    void update() {
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void shouldUpdate() {
         var book = dbBooks.get(0);
         var foundBook = bookService.findById(book.getId());
         assertThat(foundBook).isPresent();
@@ -116,6 +120,7 @@ class BookServiceImplTest {
 
     @DisplayName("должен удалить книгу по id")
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void shouldDeleteById() {
         var bookToDelete = dbBooks.get(dbBooks.indexOf(dbBooks.get(0)));
         bookService.deleteById(bookToDelete.getId());
