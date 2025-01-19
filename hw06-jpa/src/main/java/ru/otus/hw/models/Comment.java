@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -29,9 +28,7 @@ public class Comment {
     private String message;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinTable(name = "books_comments",
-            joinColumns = @JoinColumn(name = "comment_id"),
-            inverseJoinColumns = @JoinColumn(name = "book_id"))
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
 }
