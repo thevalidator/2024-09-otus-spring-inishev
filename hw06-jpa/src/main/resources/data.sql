@@ -14,4 +14,5 @@ values (1, 1),   (1, 2),
        (3, 5),   (3, 6);
 
 insert into comments(message, book_id)
-values ('Comment_book-1_1', 1), ('Comment_book-2_1', 1), ('Comment_book-3_2', 2);
+values ('Comment-1_book-1', 1), ('Comment-2_book-1', 1),
+       ('Comment-1_book-2', 2), ('Comment-1_book-3', 3);
