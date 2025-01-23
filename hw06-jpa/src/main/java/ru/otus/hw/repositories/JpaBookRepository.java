@@ -5,7 +5,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
@@ -30,21 +29,20 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        Map<String, Object> props = Map.of(FETCH_GRAPH_PROP, getBookEntityGraph());
+        Map<String, Object> props = Map.of(FETCH_GRAPH_PROP, bookGraph);
         return Optional.ofNullable(em.find(Book.class, id, props));
     }
 
     @Override
     public List<Book> findAll() {
         return em.createQuery("select b from Book b", Book.class)
-                .setHint(FETCH_GRAPH_PROP, getBookEntityGraph())
+                .setHint(FETCH_GRAPH_PROP, bookGraph)
                 .getResultList();
     }
 
     @Override
     public Book save(Book book) {
         if (book.getId() > 0) {
-            //TODO: need to check if book exists??
             book = em.merge(book);
         } else {
             em.persist(book);
@@ -55,14 +53,7 @@ public class JpaBookRepository implements BookRepository {
     @Override
     public void deleteById(long id) {
         Book book = em.find(Book.class, id);
-        if (book == null) {
-            throw new EntityNotFoundException("Book with id " + id + " not found");
-        }
         em.remove(book);
-    }
-
-    private EntityGraph<?> getBookEntityGraph() {
-        return bookGraph;
     }
 
 }

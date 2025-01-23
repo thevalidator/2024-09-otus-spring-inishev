@@ -33,7 +33,6 @@ class JpaCommentRepositoryTest {
                 .createQuery("select c from Comment c where c.book.id = :bookId", Comment.class)
                 .setParameter("bookId", bookId)
                 .getResultList();
-        ;
         var foundComments = jpaCommentRepository.findAllByBookId(bookId);
         assertThat(foundComments).usingRecursiveComparison().isEqualTo(expectedComments);
         System.out.println(foundComments);
