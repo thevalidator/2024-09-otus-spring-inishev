@@ -25,7 +25,7 @@ class JpaCommentRepositoryTest {
     @Autowired
     private JpaCommentRepository jpaCommentRepository;
 
-    @DisplayName("должен загружать комментарий по id")
+    @DisplayName("должен загружать все комментарии по id книги")
     @ParameterizedTest
     @MethodSource("getBookIds")
     void shouldFindAllCommentsByBookId(long bookId) {

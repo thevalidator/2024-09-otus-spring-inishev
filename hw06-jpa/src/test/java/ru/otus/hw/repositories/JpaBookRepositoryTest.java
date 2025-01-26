@@ -74,7 +74,7 @@ class JpaBookRepositoryTest {
                 .isEqualTo(returnedBook);
     }
 
-    @DisplayName("должен удалять книгу по id ")
+    @DisplayName("должен удалять книгу по id")
     @Test
     void shouldDeleteBook() {
         assertThat(bookRepository.findById(1L)).isPresent();
