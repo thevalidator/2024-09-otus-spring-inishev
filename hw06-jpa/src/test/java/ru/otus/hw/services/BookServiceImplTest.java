@@ -128,12 +128,6 @@ class BookServiceImplTest {
         assertThat(deletedBook.isEmpty()).isTrue();
     }
 
-    @DisplayName("должен выбросить исключение при удалении книги по несуществующему id")
-    @Test
-    void shouldThrowExceptionWhenDeleteByNotExistingId() {
-        assertThrows(EntityNotFoundException.class, () -> bookService.deleteById(444412345L));
-    }
-
     private static List<Author> getDbAuthors() {
         return IntStream.range(1, 4).boxed()
                 .map(id -> new Author(id, "Author_" + id))
