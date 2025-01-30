@@ -8,6 +8,7 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.converters.CommentConverter;
@@ -23,10 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 @Import({
+        BookServiceImpl.class,
         CommentServiceImpl.class,
         CommentConverter.class})
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CommentServiceImplTest {
+    @Autowired
+    private BookServiceImpl bookService;
 
     @Autowired
     private CommentServiceImpl commentService;
@@ -64,6 +69,17 @@ class CommentServiceImplTest {
         var foundComment = commentService.getCommentById(3L);
         assertThat(foundComment.isPresent()).isTrue();
         assertThrows(LazyInitializationException.class, () -> foundComment.get().getBook().getTitle());
+    }
+
+    @DisplayName("должны удалиться комментарии из книги при удалении последней")
+    @Test
+    void shouldDeleteBookCommentsWhenDeleteBook() {
+        var bookId = 1L;
+        var foundComment = commentService.getCommentById(bookId);
+        assertThat(foundComment.isPresent()).isTrue();
+        bookService.deleteById(bookId);
+        foundComment = commentService.getCommentById(bookId);
+        assertThat(foundComment.isPresent()).isFalse();
     }
 
 }
