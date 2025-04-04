@@ -42,7 +42,7 @@ public class TrackController {
     }
 
     @GetMapping("/tracks/{track_id}")
-    public TrackDto createTrack(@PathVariable("track_id") Long trackId) {
+    public TrackDto getTrack(@PathVariable("track_id") Long trackId) {
         var track = trackService.getTrackById(trackId);
         return trackConverter.toTrackDto(track);
     }

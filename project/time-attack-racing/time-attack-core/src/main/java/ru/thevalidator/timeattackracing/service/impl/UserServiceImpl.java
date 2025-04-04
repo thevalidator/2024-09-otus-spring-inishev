@@ -1,5 +1,7 @@
 package ru.thevalidator.timeattackracing.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import static ru.thevalidator.timeattackracing.entity.RoleName.USER;
 @Transactional
 public class UserServiceImpl implements UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     private final UserRepository userRepository;
 
     private final RoleRepository roleRepository;
@@ -39,13 +43,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserRegistrationRequest dto) {
+        checkIfUserExists(dto);
+        UserEntity newUser = userRepository.save(convertToUser(dto));
+        log.info("User created: [id={}]", newUser.getId());
+    }
+
+    private void checkIfUserExists(UserRegistrationRequest dto) {
         Optional<UserEntity> found = userRepository.findByEmailIgnoreCase(dto.getEmail());
-        found.ifPresentOrElse(
-                u -> {
-                    throw new UserAlreadyExistsException();
-                },
-                () -> userRepository.save(convertToUser(dto))
-        );
+        found.ifPresent(u -> {throw new UserAlreadyExistsException();});
     }
 
     private UserEntity convertToUser(UserRegistrationRequest dto) {
@@ -84,7 +89,8 @@ public class UserServiceImpl implements UserService {
         RoleEntity newRole = roleRepository.findByName(role)
                 .orElseThrow(() -> new ItemNotFoundException(String.format("Role %s not found.", role)));
         user.setRole(newRole);
-        userRepository.save(user);
+        user = userRepository.save(user);
+        log.info("User [id={}] was promoted to {} role", user.getId(), role);
     }
 
 }

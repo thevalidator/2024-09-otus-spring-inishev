@@ -1,5 +1,7 @@
 package ru.thevalidator.timeattackracing.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import java.util.List;
 @Service
 @Transactional
 public class SessionServiceImpl implements SessionService {
+
+    private static final Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 
     private final SessionTypeRepository sessionTypeRepository;
 
@@ -52,7 +56,9 @@ public class SessionServiceImpl implements SessionService {
         session.setSessionName(rq.getSessionName());
         session.setLapsLimit(rq.getLapsLimit());
 
-        return sessionRepository.save(session);
+        session = sessionRepository.save(session);
+        log.info("Session created [id={}]", session.getId());
+        return session;
     }
 
     @Override

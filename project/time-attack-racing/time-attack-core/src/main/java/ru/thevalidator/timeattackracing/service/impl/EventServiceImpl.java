@@ -1,5 +1,7 @@
 package ru.thevalidator.timeattackracing.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,8 @@ import java.util.Objects;
 @Service
 @Transactional
 public class EventServiceImpl implements EventService {
+
+    private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
 
     private final EventRepository eventRepository;
 
@@ -74,7 +78,9 @@ public class EventServiceImpl implements EventService {
         event.setDate(rq.getDate());
         event.setTrack(track);
         event.setCategories(categories);
-        return eventRepository.save(event);
+        event =  eventRepository.save(event);
+        log.info("Event created [id={}].", event.getId());
+        return event;
     }
 
     @Override
@@ -108,7 +114,8 @@ public class EventServiceImpl implements EventService {
         registration.setCreatedAt(LocalDateTime.now());
 
         try {
-            crewRepository.saveAndFlush(registration);
+            registration = crewRepository.saveAndFlush(registration);
+            log.info("Crew event registration created [id={}].", registration.getId());
         } catch (DataIntegrityViolationException e) {
             throw new ConstraintViolationErrorException("Duplicate user or race number");
         }

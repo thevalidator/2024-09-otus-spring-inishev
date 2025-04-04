@@ -38,13 +38,15 @@ public class RestApiErrorHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Error> handleException(HttpServletRequest request, Exception ex) {
-        log.error("{} :: message: {}", getExceptionClassSimpleName(ex), ex.getMessage(), ex);
+        String method = request.getMethod();
+        String url = request.getRequestURL().toString();
+        log.error("{} :: [{}:{}] - message: {}", getExceptionClassSimpleName(ex), method, url, ex.getMessage(), ex);
         Error error = new Error.Builder()
                 .errorCode(GENERIC_ERROR.getErrorCode())
                 .message(GENERIC_ERROR.getErrorMessage())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .url(request.getRequestURL().toString())
-                .method(request.getMethod())
+                .url(url)
+                .method(method)
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -202,7 +204,9 @@ public class RestApiErrorHandler {
     @ExceptionHandler({AuthorizationDeniedException.class})
     public ResponseEntity<Error> handleAuthorizationDeniedException(HttpServletRequest request,
                                                                     AuthorizationDeniedException ex) {
-        log.error("{} :: message: {}", getExceptionClassSimpleName(ex), ex.getMessage());
+        String method = request.getMethod();
+        String url = request.getRequestURL().toString();
+        log.error("{} :: [{}:{}] - message: {}", getExceptionClassSimpleName(ex), method, url, ex.getMessage());
         Error error = new Error.Builder()
                 .errorCode(ErrorCode.ACCESS_DENIED.getErrorCode())
                 .message(ex.getMessage())

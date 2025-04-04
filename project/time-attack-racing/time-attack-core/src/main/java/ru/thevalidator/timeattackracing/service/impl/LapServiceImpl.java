@@ -76,7 +76,7 @@ public class LapServiceImpl implements LapService {
         int successful = savedLaps.size();
         int failed = readResult.getBadRecords();
         int total = readResult.getTotalRecords();
-        log.info("Save laps result: success - {}, fail - {}, total - {}", successful, failed, total);
+        log.info("Saved laps result: success - {}, fail - {}, total - {}", successful, failed, total);
         return new LapsSaveResult(successful, failed, total);
     }
 

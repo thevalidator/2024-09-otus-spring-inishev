@@ -1,5 +1,7 @@
 package ru.thevalidator.timeattackracing.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.thevalidator.timeattackracing.converter.VehicleConverter;
@@ -17,6 +19,8 @@ import java.util.UUID;
 @Service
 @Transactional
 public class VehicleServiceImpl implements VehicleService {
+
+    private static final Logger log = LoggerFactory.getLogger(VehicleServiceImpl.class);
 
     private final UserService userService;
 
@@ -42,7 +46,9 @@ public class VehicleServiceImpl implements VehicleService {
     public VehicleEntity createVehicle(VehicleCreateRequest rq) {
         UserEntity user = userService.getUserById(rq.getUserId());
         VehicleEntity entity = vehicleConverter.toVehicleEntity(rq, user);
-        return vehicleRepository.save(entity);
+        entity = vehicleRepository.save(entity);
+        log.info("Vehicle created [id={}]", entity.getId());
+        return entity;
     }
 
     @Override

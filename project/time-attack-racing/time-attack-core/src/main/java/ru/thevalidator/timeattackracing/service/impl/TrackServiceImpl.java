@@ -1,5 +1,7 @@
 package ru.thevalidator.timeattackracing.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import java.util.List;
 @Transactional
 public class TrackServiceImpl implements TrackService {
 
+    private static final Logger log = LoggerFactory.getLogger(TrackServiceImpl.class);
+
     private final TrackRepository trackRepository;
 
     public TrackServiceImpl(TrackRepository trackRepository) {
@@ -27,7 +31,9 @@ public class TrackServiceImpl implements TrackService {
         TrackEntity track = new TrackEntity();
         track.setName(rq.getTrackName());
         try {
-            return trackRepository.save(track);
+            track = trackRepository.save(track);
+            log.debug("Track created [id={}]", track);
+            return track;
         } catch (DataIntegrityViolationException e) {
             throw new ConstraintViolationErrorException("Duplicate track name");
         }
