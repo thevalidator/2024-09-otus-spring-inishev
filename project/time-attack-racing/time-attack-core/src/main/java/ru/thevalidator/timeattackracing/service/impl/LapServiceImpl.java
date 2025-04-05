@@ -5,13 +5,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.thevalidator.timeattackracing.converter.ClassificationCategoryConverter;
 import ru.thevalidator.timeattackracing.converter.CrewConverter;
 import ru.thevalidator.timeattackracing.dto.CrewDto;
 import ru.thevalidator.timeattackracing.dto.CrewLapsDto;
 import ru.thevalidator.timeattackracing.dto.GroupedCrewLapsDto;
 import ru.thevalidator.timeattackracing.dto.LapsReadResult;
 import ru.thevalidator.timeattackracing.dto.LapsSaveResult;
+import ru.thevalidator.timeattackracing.dto.SessionResultByCategoryDto;
+import ru.thevalidator.timeattackracing.entity.ClassificationCategoryEntity;
 import ru.thevalidator.timeattackracing.entity.CrewEntity;
+import ru.thevalidator.timeattackracing.entity.EventEntity;
 import ru.thevalidator.timeattackracing.entity.LapEntity;
 import ru.thevalidator.timeattackracing.entity.SessionEntity;
 import ru.thevalidator.timeattackracing.exception.ItemNotFoundException;
@@ -47,21 +51,25 @@ public class LapServiceImpl implements LapService {
 
     private final CrewConverter crewConverter;
 
+    private final ClassificationCategoryConverter classificationCategoryConverter;
+
     public LapServiceImpl(List<LapsFileReader> fileReaders,
                           SessionService sessionService,
                           LapRepository lapRepository,
                           CrewRepository crewRepository,
-                          CrewConverter crewConverter) {
+                          CrewConverter crewConverter,
+                          ClassificationCategoryConverter classificationCategoryConverter) {
         this.fileReaders = fileReaders;
         this.sessionService = sessionService;
         this.lapRepository = lapRepository;
         this.crewRepository = crewRepository;
         this.crewConverter = crewConverter;
+        this.classificationCategoryConverter = classificationCategoryConverter;
     }
 
     @Override
     public LapsSaveResult saveLaps(Long sessionId, FileType fileType, MultipartFile file) {
-        log.info("Saving laps for session {} from file {} of type {}", sessionId, file.getOriginalFilename(),  fileType);
+        log.info("Saving laps for session {} from file {} of type {}", sessionId, file.getOriginalFilename(), fileType);
         SessionEntity session = sessionService.getSessionsById(sessionId);
         Long eventId = session.getEvent().getId();
         Set<Integer> eventRacingNumbers = crewRepository.findAllByEventId(eventId).stream()
@@ -130,7 +138,7 @@ public class LapServiceImpl implements LapService {
     @Override
     public List<CrewLapsDto> getLeaderboardBySessionId(Long sessionId) {
         List<CrewLapsDto> leaderboard = new ArrayList<>();
-        List<LapEntity> bestLaps = lapRepository.findAcsSortedCrewBestLapsBySessionId(sessionId);
+        List<LapEntity> bestLaps = lapRepository.findAscSortedCrewBestLapsBySessionId(sessionId);
         SessionEntity session = sessionService.getSessionsById(sessionId);
         bestLaps.forEach(lap -> {
             Optional<CrewEntity> crew = crewRepository.findByRacingNumberAndEventId(lap.getRacingNumber(), session.getEvent().getId());
@@ -144,6 +152,37 @@ public class LapServiceImpl implements LapService {
             }
         });
         return leaderboard;
+    }
+
+    @Override
+    public List<SessionResultByCategoryDto> getGroupedLeaderboardBySessionId(Long sessionId) {
+        List<LapEntity> bestLaps = lapRepository.findAscSortedCrewBestLapsBySessionId(sessionId);
+        SessionEntity session = sessionService.getSessionsById(sessionId);
+        EventEntity event = session.getEvent();
+        List<ClassificationCategoryEntity> categories = event.getCategories();
+
+        Map<ClassificationCategoryEntity, SessionResultByCategoryDto> leaderboardByCategory = new HashMap<>();
+        for (ClassificationCategoryEntity c: categories) {
+            SessionResultByCategoryDto result = new SessionResultByCategoryDto();
+            result.setClassificationCategory(classificationCategoryConverter.toClassificationCategoryDto(c));
+            result.setData(new ArrayList<>());
+            leaderboardByCategory.put(c, result);
+        }
+
+        bestLaps.forEach(lap -> {
+            Optional<CrewEntity> crew = crewRepository.findByRacingNumberAndEventId(lap.getRacingNumber(), event.getId());
+            if (crew.isPresent()) {
+                CrewEntity crewEntity = crew.get();
+                CrewDto c = crewConverter.toCrewDto(crew.get());
+                Long lapTime = lap.getLapTime();
+                CrewLapsDto data = new CrewLapsDto();
+                data.setCrew(c);
+                data.setLapTimes(List.of(lapTime));
+                leaderboardByCategory.get(crewEntity.getCategory()).getData().add(data);
+            }
+        });
+
+        return leaderboardByCategory.values().stream().toList();
     }
 
     @Override

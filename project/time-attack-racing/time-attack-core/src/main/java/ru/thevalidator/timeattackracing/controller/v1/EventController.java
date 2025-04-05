@@ -17,10 +17,12 @@ import ru.thevalidator.timeattackracing.dto.CreateEventRequest;
 import ru.thevalidator.timeattackracing.dto.EventDto;
 import ru.thevalidator.timeattackracing.dto.EventPage;
 import ru.thevalidator.timeattackracing.dto.EventRegistrationRequest;
-import ru.thevalidator.timeattackracing.dto.EventResultDto;
+import ru.thevalidator.timeattackracing.dto.EventResultByCategoryDto;
 import ru.thevalidator.timeattackracing.dto.GroupedCrewListDto;
 import ru.thevalidator.timeattackracing.service.EventResultService;
 import ru.thevalidator.timeattackracing.service.EventService;
+
+import java.util.List;
 
 
 @RestController
@@ -82,7 +84,7 @@ public class EventController {
     }
 
     @GetMapping("/events/{event_id}/results")
-    public EventResultDto getEventResults(@PathVariable("event_id") Long eventId) {
+    public List<EventResultByCategoryDto> getEventResults(@PathVariable("event_id") Long eventId) {
         return eventResultService.getEventResultDto(eventId);
     }
 

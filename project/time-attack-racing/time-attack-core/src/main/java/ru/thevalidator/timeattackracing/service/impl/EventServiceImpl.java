@@ -78,7 +78,7 @@ public class EventServiceImpl implements EventService {
         event.setDate(rq.getDate());
         event.setTrack(track);
         event.setCategories(categories);
-        event =  eventRepository.save(event);
+        event = eventRepository.save(event);
         log.info("Event created [id={}].", event.getId());
         return event;
     }

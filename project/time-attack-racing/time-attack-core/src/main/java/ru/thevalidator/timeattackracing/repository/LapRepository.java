@@ -27,7 +27,7 @@ public interface LapRepository extends JpaRepository<LapEntity, Long> {
                 "from lap l3 " +
                 "where l3.lap_time = l.lap_time and l3.racing_number = l.racing_number and session_id = :sessionId" +
             ")")
-    List<LapEntity> findAcsSortedCrewBestLapsBySessionId(@Param("sessionId") Long sessionId);
+    List<LapEntity> findAscSortedCrewBestLapsBySessionId(@Param("sessionId") Long sessionId);
 
     List<LapEntity> findLapsBySessionIdAndRacingNumber(Long sessionId, Integer raceNumber);
 

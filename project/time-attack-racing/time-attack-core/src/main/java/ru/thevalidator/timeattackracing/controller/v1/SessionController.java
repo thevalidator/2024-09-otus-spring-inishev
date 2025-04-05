@@ -17,6 +17,7 @@ import ru.thevalidator.timeattackracing.dto.CrewLapsDto;
 import ru.thevalidator.timeattackracing.dto.EventSessionDto;
 import ru.thevalidator.timeattackracing.dto.GroupedCrewLapsDto;
 import ru.thevalidator.timeattackracing.dto.LapsSaveResult;
+import ru.thevalidator.timeattackracing.dto.SessionResultByCategoryDto;
 import ru.thevalidator.timeattackracing.entity.SessionEntity;
 import ru.thevalidator.timeattackracing.entity.SessionTypeEntity;
 import ru.thevalidator.timeattackracing.service.LapService;
@@ -71,8 +72,13 @@ public class SessionController {
     }
 
     @GetMapping("/sessions/{session_id}/leaderboards")
-    public List<CrewLapsDto> getAnonymousSessionLeaderboard(@PathVariable(name = "session_id") Long sessionId) {
+    public List<CrewLapsDto> getAbsoluteSessionLeaderboard(@PathVariable(name = "session_id") Long sessionId) {
         return lapService.getLeaderboardBySessionId(sessionId);
+    }
+
+    @GetMapping("/sessions/{session_id}/leaderboards-grouped-by-category")
+    public List<SessionResultByCategoryDto> getGroupedByCategorySessionLeaderboard(@PathVariable(name = "session_id") Long sessionId) {
+        return lapService.getGroupedLeaderboardBySessionId(sessionId);
     }
 
     @PreAuthorize("hasAuthority('SCOPE_READ_ALL_LAPS')")

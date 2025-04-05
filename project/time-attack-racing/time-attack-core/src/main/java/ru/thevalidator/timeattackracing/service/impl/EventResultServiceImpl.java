@@ -2,11 +2,15 @@ package ru.thevalidator.timeattackracing.service.impl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.thevalidator.timeattackracing.converter.ClassificationCategoryConverter;
 import ru.thevalidator.timeattackracing.converter.CrewConverter;
+import ru.thevalidator.timeattackracing.dto.ClassificationCategoryDto;
 import ru.thevalidator.timeattackracing.dto.CrewLapsDto;
 import ru.thevalidator.timeattackracing.dto.CrewResultDto;
-import ru.thevalidator.timeattackracing.dto.EventResultDto;
+import ru.thevalidator.timeattackracing.dto.EventResultByCategoryDto;
+import ru.thevalidator.timeattackracing.entity.ClassificationCategoryEntity;
 import ru.thevalidator.timeattackracing.entity.CrewEntity;
+import ru.thevalidator.timeattackracing.entity.EventEntity;
 import ru.thevalidator.timeattackracing.entity.SessionEntity;
 import ru.thevalidator.timeattackracing.entity.SessionType;
 import ru.thevalidator.timeattackracing.service.EventResultService;
@@ -36,25 +40,52 @@ public class EventResultServiceImpl implements EventResultService {
 
     private final CrewConverter crewConverter;
 
-    public EventResultServiceImpl(SessionService sessionService, EventService eventService, LapService lapService, CrewConverter crewConverter) {
+    private final ClassificationCategoryConverter classificationCategoryConverter;
+
+    public EventResultServiceImpl(SessionService sessionService,
+                                  EventService eventService,
+                                  LapService lapService,
+                                  CrewConverter crewConverter,
+                                  ClassificationCategoryConverter classificationCategoryConverter) {
         this.sessionService = sessionService;
         this.eventService = eventService;
         this.lapService = lapService;
         this.crewConverter = crewConverter;
+        this.classificationCategoryConverter = classificationCategoryConverter;
     }
 
     @Override
-    public EventResultDto getEventResultDto(Long eventId) {
+    public List<EventResultByCategoryDto> getEventResultDto(Long eventId) {
         //@TODO: refactor this
+
+        //get event categories
+        EventEntity event = eventService.getById(eventId);
+        List<ClassificationCategoryEntity> categories = event.getCategories();
+
+        //prepare final result template
+        Map<ClassificationCategoryEntity, EventResultByCategoryDto> finalResults = new HashMap<>();
+        for (ClassificationCategoryEntity cat: categories) {
+            EventResultByCategoryDto catResult = new EventResultByCategoryDto();
+
+            ClassificationCategoryDto catDto = classificationCategoryConverter.toClassificationCategoryDto(cat);
+            catResult.setClassificationCategory(catDto);
+            catResult.setData(new ArrayList<>());
+            finalResults.put(cat, catResult);
+        }
+
+        //get competition sessions
         List<SessionEntity> eventSessions = sessionService.getSessionsByEventId(eventId);
         List<SessionEntity> competitionSessions = eventSessions.stream()
                 .filter(session -> SessionType.COMPETITION.equals(session.getSessionType().getName()))
                 .toList();
 
+        //get crews
         List<CrewEntity> crews = eventService.getEventCrewRegistrations(eventId);
 
-        int numberOfSessions = competitionSessions.size();
+
+        //collect lap times by crew
         Map<Integer, Long[]> lapTimes = new HashMap<>();
+        int numberOfSessions = competitionSessions.size();
         crews.forEach(crew -> lapTimes.put(crew.getRacingNumber(), new Long[numberOfSessions + 1]));
 
         long[] worstTimes = new long[numberOfSessions];
@@ -81,27 +112,29 @@ public class EventResultServiceImpl implements EventResultService {
             laps[laps.length - 1] = summaryLapsTime;
         }
 
-        List<CrewResultDto> cr = new ArrayList<>();
+
         for (CrewEntity crew: crews) {
+            EventResultByCategoryDto classificationCategoryResults = finalResults.get(crew.getCategory());
+
             Long[] l = lapTimes.get(crew.getRacingNumber());
-            CrewResultDto r = new CrewResultDto();
+            CrewResultDto crewResult = new CrewResultDto();
             var c = crewConverter.toCrewDto(crew);
-            r.setCrew(c);
-            r.setSummaryTime(l[l.length - 1]);
+            crewResult.setCrew(c);
+            crewResult.setSummaryTime(l[l.length - 1]);
             List<Long> ct = new ArrayList<>(l.length);
             for (int i = 0; i < l.length - 1; i++) {
                 ct.add(l[i]);
             }
-            r.setCompetitionTimes(ct);
-            cr.add(r);
+            crewResult.setCompetitionTimes(ct);
+
+            classificationCategoryResults.getData().add(crewResult);
         }
-        Collections.sort(cr);
 
+        for (EventResultByCategoryDto dto: finalResults.values()) {
+            Collections.sort(dto.getData());
+        }
 
-        EventResultDto evr = new EventResultDto(cr);
-
-
-        return evr;
+        return finalResults.values().stream().sorted().toList();
     }
 
 }

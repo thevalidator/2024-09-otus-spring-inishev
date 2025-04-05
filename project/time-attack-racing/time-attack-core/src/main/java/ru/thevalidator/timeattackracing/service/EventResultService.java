@@ -1,9 +1,11 @@
 package ru.thevalidator.timeattackracing.service;
 
-import ru.thevalidator.timeattackracing.dto.EventResultDto;
+import ru.thevalidator.timeattackracing.dto.EventResultByCategoryDto;
+
+import java.util.List;
 
 public interface EventResultService {
 
-    EventResultDto getEventResultDto(Long eventId);
+    List<EventResultByCategoryDto> getEventResultDto(Long eventId);
 
 }
