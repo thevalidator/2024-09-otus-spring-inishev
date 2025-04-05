@@ -12,6 +12,14 @@ public class TimeAttackRacingApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TimeAttackRacingApplication.class, args);
+        System.out.println("""
+                        
+                        ############################################################################################
+                        #                                                                                          #
+                        #        API documentation can be found by this url: http://localhost:8080/api-docs        #
+                        #                                                                                          #
+                        ############################################################################################
+                        """);
     }
 
 }

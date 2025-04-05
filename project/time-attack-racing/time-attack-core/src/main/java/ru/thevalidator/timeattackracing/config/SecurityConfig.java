@@ -22,6 +22,10 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(
                         rq -> rq.requestMatchers(
+                                        "/api-docs",
+                                        "/js/**",
+                                        "/css/**",
+                                        "/img/**",
                                         "/actuator/**",
                                         "/api/v1/auth/sign-up",
                                         "/api/v1/auth/sign-in",
