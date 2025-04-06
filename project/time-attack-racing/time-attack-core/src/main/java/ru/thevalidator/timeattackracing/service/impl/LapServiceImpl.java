@@ -18,6 +18,7 @@ import ru.thevalidator.timeattackracing.entity.CrewEntity;
 import ru.thevalidator.timeattackracing.entity.EventEntity;
 import ru.thevalidator.timeattackracing.entity.LapEntity;
 import ru.thevalidator.timeattackracing.entity.SessionEntity;
+import ru.thevalidator.timeattackracing.exception.ConstraintViolationErrorException;
 import ru.thevalidator.timeattackracing.exception.ItemNotFoundException;
 import ru.thevalidator.timeattackracing.exception.UnsupportedFormatException;
 import ru.thevalidator.timeattackracing.repository.CrewRepository;
@@ -71,6 +72,7 @@ public class LapServiceImpl implements LapService {
     public LapsSaveResult saveLaps(Long sessionId, FileType fileType, MultipartFile file) {
         log.info("Saving laps for session {} from file {} of type {}", sessionId, file.getOriginalFilename(), fileType);
         SessionEntity session = sessionService.getSessionsById(sessionId);
+        int sessionLapsLimit = session.getLapsLimit();
         Long eventId = session.getEvent().getId();
         Set<Integer> eventRacingNumbers = crewRepository.findAllByEventId(eventId).stream()
                 .map(CrewEntity::getRacingNumber)
@@ -79,6 +81,9 @@ public class LapServiceImpl implements LapService {
         LapsFileReader reader = getFileLapsReader(fileType);
         LapsReadResult readResult = reader.readLaps(file, session, eventRacingNumbers);
         List<LapEntity> laps = readResult.getLaps();
+
+        throwIfSessionLapsLimitExceeded(laps, sessionLapsLimit);
+
         var savedLaps = lapRepository.saveAll(laps);
 
         int successful = savedLaps.size();
@@ -86,6 +91,20 @@ public class LapServiceImpl implements LapService {
         int total = readResult.getTotalRecords();
         log.info("Saved laps result: success - {}, fail - {}, total - {}", successful, failed, total);
         return new LapsSaveResult(successful, failed, total);
+    }
+
+    private void throwIfSessionLapsLimitExceeded(List<LapEntity> laps, int sessionLapsLimit) {
+        Map<Integer, Integer> crewLapsData = new HashMap<>();
+        for (LapEntity lap : laps) {
+            Integer lapsCounter = crewLapsData.getOrDefault(lap.getRacingNumber(), 0);
+            lapsCounter++;
+            crewLapsData.put(lap.getRacingNumber(), lapsCounter);
+            if (lapsCounter > sessionLapsLimit) {
+                throw new ConstraintViolationErrorException(
+                        String.format("Exceed maximum session laps limit of '%d' for racing number '%d'",
+                                sessionLapsLimit, lap.getRacingNumber()));
+            }
+        }
     }
 
     private LapsFileReader getFileLapsReader(FileType fileType) {
