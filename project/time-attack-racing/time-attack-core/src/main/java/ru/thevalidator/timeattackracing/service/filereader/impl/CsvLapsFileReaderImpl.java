@@ -67,9 +67,6 @@ public class CsvLapsFileReaderImpl implements LapsFileReader {
             totalRecords = elements.size();
             elements.forEach(e -> {
                 int racingNumber = Integer.parseInt(e[positions.get(RACING_NUMBER)]);
-                String lapTimeValue = e[positions.get(LAP_TIME)];
-                Optional<Long> lapTimeOptional = parseLapTimeAsLong(lapTimeValue);
-
                 if (!raceNumbers.contains(racingNumber)) {
                     log.error("Race number {} is not registered in the event id {}",
                             racingNumber, session.getEvent().getId());
@@ -77,6 +74,8 @@ public class CsvLapsFileReaderImpl implements LapsFileReader {
                     return;
                 }
 
+                String lapTimeValue = e[positions.get(LAP_TIME)];
+                Optional<Long> lapTimeOptional = parseLapTimeAsLong(lapTimeValue);
                 if (lapTimeOptional.isEmpty()) {
                     badRecords.getAndIncrement();
                     return;
